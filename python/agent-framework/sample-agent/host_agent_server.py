@@ -154,7 +154,7 @@ class GenericAgentHost:
         self.agent_app.conversation_update("membersAdded", auth_handlers=handler)(help_handler)
         self.agent_app.message("/help", auth_handlers=handler)(help_handler)
 
-        @self.agent_app.activity("message", auth_handlers=handler)
+        @self.agent_app.activity("message")
         async def on_message(context: TurnContext, _: TurnState):
             try:
                 result = await self._validate_agent_and_setup_context(context)
