@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
 COPY pyproject.toml ./
 COPY *.py ./
 COPY .env* ./
+COPY requirements*.txt ./
 
 # Install uv
 RUN pip install --no-cache-dir uv
