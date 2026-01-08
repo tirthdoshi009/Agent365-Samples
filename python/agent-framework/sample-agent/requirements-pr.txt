@@ -1,0 +1,12 @@
+# Template file for installing Microsoft Agent 365 SDK packages from a specific branch
+# This file is used in Docker builds and CI/CD to test branch-specific changes
+# The {{BRANCH_NAME}} placeholder will be replaced at build time
+# without modifying the main pyproject.toml
+
+# Microsoft Agent 365 SDK packages from branch: {{BRANCH_NAME}}
+git+https://github.com/microsoft/Agent365-python.git@{{BRANCH_NAME}}#subdirectory=libraries/microsoft-agents-a365-tooling
+git+https://github.com/microsoft/Agent365-python.git@{{BRANCH_NAME}}#subdirectory=libraries/microsoft-agents-a365-tooling-extensions-agentframework
+git+https://github.com/microsoft/Agent365-python.git@{{BRANCH_NAME}}#subdirectory=libraries/microsoft-agents-a365-observability-core
+git+https://github.com/microsoft/Agent365-python.git@{{BRANCH_NAME}}#subdirectory=libraries/microsoft-agents-a365-observability-extensions-agentframework
+git+https://github.com/microsoft/Agent365-python.git@{{BRANCH_NAME}}#subdirectory=libraries/microsoft-agents-a365-runtime
+git+https://github.com/microsoft/Agent365-python.git@{{BRANCH_NAME}}#subdirectory=libraries/microsoft-agents-a365-notifications
