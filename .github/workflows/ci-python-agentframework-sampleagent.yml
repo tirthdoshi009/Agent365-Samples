@@ -76,3 +76,70 @@ jobs:
       shell: bash
       run: |
         echo "### Agent Framework Sample - Python ${{ matrix.python-version }} on ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+
+  build-docker-pr:
+    name: Build Docker Image with PR Packages
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./python/agent-framework/sample-agent
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Determine branch name
+      id: branch
+      run: |
+        # For PRs, use the head branch; for push events, use the current branch
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          BRANCH_NAME="${{ github.head_ref }}"
+        else
+          BRANCH_NAME="${{ github.ref_name }}"
+        fi
+        echo "name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+        echo "Using branch: $BRANCH_NAME"
+
+    - name: Generate requirements-pr.txt with branch name
+      run: |
+        sed 's/{{BRANCH_NAME}}/${{ steps.branch.outputs.name }}/g' requirements-pr.txt > requirements-pr-generated.txt
+        echo "Generated requirements file:"
+        cat requirements-pr-generated.txt
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./python/agent-framework/sample-agent
+        file: ./python/agent-framework/sample-agent/Dockerfile
+        push: false
+        tags: agent-framework-sample:pr-${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          REQUIREMENTS_FILE=requirements-pr-generated.txt
+
+    - name: Test Docker image
+      run: |
+        docker run --rm agent-framework-sample:pr-${{ github.sha }} python -c "
+        import sys
+        try:
+            # Verify PR packages are installed
+            import microsoft_agents_a365_tooling
+            import microsoft_agents_a365_runtime
+            import microsoft_agents_a365_notifications
+            print('✅ All Microsoft Agent 365 SDK packages imported successfully')
+            sys.exit(0)
+        except ImportError as e:
+            print(f'❌ Import failed: {e}')
+            sys.exit(1)
+        "
+
+    - name: Summary
+      if: always()
+      shell: bash
+      run: |
+        echo "### Docker Build - Dynamic PR Packages" >> $GITHUB_STEP_SUMMARY
+        echo "Image built with packages from branch: **${{ steps.branch.outputs.name }}**" >> $GITHUB_STEP_SUMMARY

@@ -319,7 +319,7 @@ class GenericAgentHost:
         print(f"❤️  Health: http://localhost:{port}/api/health\n")
 
         try:
-            run_app(app, host="localhost", port=port, handle_signals=True)
+            run_app(app, host="0.0.0.0", port=port, handle_signals=True)
         except KeyboardInterrupt:
             print("\n👋 Server stopped")
 
